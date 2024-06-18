@@ -65,12 +65,12 @@ char	**creat_file_mat(t_dlist *tokens, int result, enum e_type type,
 	return (mat);
 }
 
-char	**files_in(t_dlist *tokens)
+char	**files_in(t_dlist *tokens, char **matrix_err)
 {
 	int		result;
-	t_dlist	*aux;
+	int		index;
 	char	**files;
-	char	*str_error;
+	t_dlist	*aux;
 
 	aux = tokens;
 	result = 0;
@@ -80,52 +80,127 @@ char	**files_in(t_dlist *tokens)
 	{
 		if (aux->tok->type == R_IN || aux->tok->type == H_DOC)
 		{
-			if (aux->next)
+			result++;
+			if (aux->next->tok->type == IO_FILE && !aux->next->tok->lex)
 			{
-				if (*aux->next->tok->lex = '\0')
+				if (matrix_err[0])
 				{
-					str_error = formatted_string("(", (char *) aux->next->tok->metadata[3], "): ", "ambiguous redirect\n");
-					ft_putstr_fd(str_error, STDERR_FILENO);
-					return (NULL);
+					free(matrix_err[0]);
+					free(matrix_err[1]);
+					matrix_err[0] = format_string("(", ((char *) aux->next->tok->metadata[3]), "): ", "ambiguous redirect\n");
+					matrix_err[1] = ft_itoa(0);
+					matrix_err[2] = ft_itoa(result);
 				}
-				if (aux->next->next)
+				else
 				{
-					if (aux->next->next->tok->type == IO_FILE)
-					{
-						str_error = formatted_string("(", (char *) aux->next->tok->metadata[3], "): ", "ambiguous redirect\n");
-						ft_putstr_fd(str_error, STDERR_FILENO);
-						return (NULL);
-					}
-
+					matrix_err[0] = format_string("(", ((char *) aux->next->tok->metadata[3]), "): ", "ambiguous redirect\n");
+					matrix_err[1] = ft_itoa(0);
+					matrix_err[2] = ft_itoa(result);
 				}
 			}
-			result++;
+			else if (aux->next->next)
+			{
+				if (aux->next->next->tok->type == IO_FILE)
+				{
+					if (matrix_err[0])
+					{
+						free(matrix_err[0]);
+						free(matrix_err[1]);
+						matrix_err[0] = format_string("(", ((char *) aux->next->tok->metadata[3]), "): ", "ambiguous redirect\n");
+						matrix_err[1] = ft_itoa(0);
+						matrix_err[2] = ft_itoa(result);
+					}
+					else
+					{
+						matrix_err[0] = format_string("(", ((char *) aux->next->tok->metadata[3]), "): ", "ambiguous redirect\n");
+						matrix_err[1] = ft_itoa(0);
+						matrix_err[2] = ft_itoa(result);
+					}
+				}
+			}
 		}
 		if (aux->prev == NULL)
 			break ;
 		aux = aux->prev;
 	}
+	if (matrix_err[0])
+	{
+		index = result;
+		index -= ft_atoi(matrix_err[2]);
+		free(matrix_err[2]);
+		matrix_err[2] = ft_itoa(index);
+	}
 	files = creat_file_mat(tokens, result, R_IN, H_DOC);
 	return (files);
 }
 
-char	**files_out(t_dlist *tokens)
+char	**files_out(t_dlist *tokens, char **matrix_err)
 {
 	int		result;
+	int		index;
 	t_dlist	*aux;
 	char	**files;
 
 	aux = tokens;
 	result = 0;
+	index = 0;
+	if (matrix_err[0] != NULL)
+		return (NULL);
 	while (aux->next != NULL)
 		aux = aux->next;
 	while (aux->tok->type != PIPE)
 	{
 		if (aux->tok->type == R_OUT || aux->tok->type == APPEND)
+		{
 			result++;
+			if (aux->next->tok->type == IO_FILE && !aux->next->tok->lex)
+			{
+				if (matrix_err[0])
+				{
+					free(matrix_err[0]);
+					free(matrix_err[2]);
+					matrix_err[0] = format_string("(", ((char *) aux->next->tok->metadata[3]), "): ", "ambiguous redirect\n");
+					matrix_err[1] = ft_itoa(1);
+					matrix_err[2] = ft_itoa(result);
+				}
+				else
+				{
+					matrix_err[0] = format_string("(", ((char *) aux->next->tok->metadata[3]), "): ", "ambiguous redirect\n");
+					matrix_err[1] = ft_itoa(1);
+					matrix_err[2] = ft_itoa(result);
+				}
+			}
+			else if (aux->next->next)
+			{
+				if (aux->next->next->tok->type == IO_FILE)
+				{
+					if (matrix_err[0])
+					{
+						free(matrix_err[0]);
+						free(matrix_err[2]);
+						matrix_err[0] = format_string("(", ((char *) aux->next->tok->metadata[3]), "): ", "ambiguous redirect\n");
+						matrix_err[1] = ft_itoa(1);
+						matrix_err[2] = ft_itoa(result);
+					}
+					else
+					{
+						matrix_err[0] = format_string("(", ((char *) aux->next->tok->metadata[3]), "): ", "ambiguous redirect\n");
+						matrix_err[1] = ft_itoa(1);
+						matrix_err[2] = ft_itoa(result);
+					}
+				}
+			}
+		}
 		if (aux->prev == NULL)
 			break ;
 		aux = aux->prev;
+	}
+	if (matrix_err[0])
+	{
+		index = result;
+		index -= ft_atoi(matrix_err[2]);
+		free(matrix_err[2]);
+		matrix_err[2] = ft_itoa(index);
 	}
 	files = creat_file_mat(tokens, result, R_OUT, APPEND);
 	return (files);
@@ -135,9 +210,10 @@ char	***have_redirect(t_dlist *tokens)
 {
 	char	***files;
 
-	files = ft_calloc(sizeof(char **), 4);
-	files[0] = files_in(tokens);
-	files[1] = files_out(tokens);
+	files = (char ***) ft_calloc(sizeof(char **), 5);
+	files[3] = (char **) ft_calloc(sizeof(char *), 4);
+	files[0] = files_in(tokens, files[3]);
+	files[1] = files_out(tokens, files[3]);
 	files[2] = have_append(tokens);
 	return (files);
 }

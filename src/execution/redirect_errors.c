@@ -98,12 +98,16 @@ int	redirect_in_error(t_ast *root)
 	int	index;
 
 	index = 0;
-	if ()
 	while (index != -1 && root->files[0][index] != NULL)
 	{
-		if (access(root->files[0][index], F_OK) == -1)
+		if (ft_atoi(root->files[3][1]) == 0 && ft_atoi(root->files[3][2]) == index)
+		{
+			ft_putstr_fd(root->files[3][0], STDERR_FILENO);
+			index = -2;
+		}
+		if (index != -2 && access(root->files[0][index], F_OK) == -1)
 			closing_process_message(root, 0, &index, NOFILE);
-		else if (access(root->files[0][index], R_OK) == -1)
+		else if (index != -2 && access(root->files[0][index], R_OK) == -1)
 			closing_process_message(root, 0, &index, MINI_EACCES);
 		index++;
 	}
@@ -120,14 +124,22 @@ int	redirect_out_error(t_ast *root)
 	index = 0;
 	while (index != -1 && root->files[1][index] != NULL)
 	{
-		fd = open(root->files[1][index], __O_DIRECTORY);
-		if (fd != -1)
+		if (ft_atoi(root->files[3][1]) == 1 && ft_atoi(root->files[3][2]) == index)
 		{
-			closing_process_message(root, 1, &index, MINI_EISDIR);
-			close(fd);
+			ft_putstr_fd(root->files[3][0], STDERR_FILENO);
+			index = -2;
 		}
-		else if ((access(root->files[1][index], W_OK) != 0))
-			closing_process_message(root, 1, &index, MINI_EACCES);
+		if (index != -2)
+		{
+			fd = open(root->files[1][index], __O_DIRECTORY);
+			if (fd != -1)
+			{
+				closing_process_message(root, 1, &index, MINI_EISDIR);
+				close(fd);
+			}
+			else if ((access(root->files[1][index], W_OK) != 0))
+				closing_process_message(root, 1, &index, MINI_EACCES);
+		}
 		index++;
 	}
 	if (index == -1)

@@ -98,7 +98,7 @@ int	ft_isexpansion(int c)
 	return (0);
 }
 
-int	has_expansion(char *lex, int *index, int *is_quoted)
+int	has_expansion(char *lex, long int *index, long int *is_quoted)
 {
 	while (lex[*index])
 	{

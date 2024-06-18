@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-static void	transcribing_content(char *content, int fd, int *index, int *start)
+static void	transcribing_content(char *content, int fd, long int *index, long int *start)
 {
 	*index = *start;
 	if (*content == ' ')
@@ -91,8 +91,7 @@ void	send_for_expansion(t_dlist *node)
 	{
 		if (!has_expansion(node->tok->lex,
 				&node->tok->metadata[0], &node->tok->metadata[2]))
-			node->tok->type = WORD;
-		return ;
+			return ;
 	}
 	variable = getting_variable(varname);
 	if (ft_have_char(variable, '='))
@@ -129,8 +128,6 @@ void	send_for_expansion(t_dlist *node)
 void	expansion(t_dlist **tokens)
 {
 	t_dlist		*tok;
-	t_dlist		*next_tok;
-	char		*io_file_lexeme;
 
 	tok = *tokens;
 	while (tok)
@@ -145,11 +142,6 @@ void	expansion(t_dlist **tokens)
 		else if (tok->next == NULL)
 			break ;
 		else
-		{
 			tok = tok->next;
-			next_tok = NULL;
-			if (tok->next)
-				next_tok = tok->next;
-		}
 	}
 }
