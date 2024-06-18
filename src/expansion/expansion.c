@@ -109,39 +109,38 @@ void	send_for_expansion(t_dlist *node)
 	return ;
 }
 
-void	check_ambiguous_redirect(t_dlist *tok, t_dlist *next_tok)
-{
-	if (!*tok->tok->lex)
-	{
-		tok->tok->metadata[3] = 1;
-		tok->tok->metadata[0] = -1;
-		return ;
-	}
-	if (tok->next != next_tok)
-	{
-		tok->tok->metadata[3] = 1;
-		tok->tok->metadata[0] = -1;
-		return ;
-	}
-	return ;
-}
+// void	check_ambiguous_redirect(t_dlist *tok, t_dlist *next_tok)
+// {
+// 	if (!*tok->tok->lex)
+// 	{
+// 		tok->tok->metadata[3] = 1;
+// 		tok->tok->metadata[0] = -1;
+// 		return ;
+// 	}
+// 	if (tok->next != next_tok)
+// 	{
+// 		tok->tok->metadata[3] = 1;
+// 		tok->tok->metadata[0] = -1;
+// 		return ;
+// 	}
+// 	return ;
+// }
 
 void	expansion(t_dlist **tokens)
 {
 	t_dlist		*tok;
 	t_dlist		*next_tok;
+	char		*io_file_lexeme;
 
 	tok = *tokens;
-	if (tok->next)
-		next_tok = tok->next;
 	while (tok)
 	{
 		if ((tok->tok->type == ASSIGNMENT_WORD || tok->tok->type == IO_FILE)
 			&& tok->tok->metadata[0] > -1)
 		{
-			send_for_expansion(tok);
 			if (tok->tok->type == IO_FILE)
-				check_ambiguous_redirect(tok, next_tok);
+				tok->tok->metadata[3] = (long int) ft_strdup(tok->tok->lex);
+			send_for_expansion(tok);
 		}
 		else if (tok->next == NULL)
 			break ;

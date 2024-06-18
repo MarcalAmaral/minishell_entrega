@@ -12,16 +12,28 @@
 
 #include "minishell.h"
 
-void	redir_fds_control(t_ast *root)
+int	redir_fds_control(t_ast *root)
 {
+	int	status;
+
+	status = 0;
 	if (root->files[0] != NULL)
-		files_in_control(root);
+	{
+		status = files_in_control(root);
+		if (status)
+			return (EXIT_FAILURE);
+	}
 	else
 		root->redir_fds[0] = 0;
-	if (root && root->files[1] != NULL)
-		files_out_control(root);
+	if (!status && root->files[1] != NULL)
+	{
+		status = files_out_control(root);
+		if (status)
+			return (EXIT_FAILURE);
+	}
 	else
 		root->redir_fds[1] = 0;
+	return (EXIT_SUCCESS);
 }
 
 char	**creat_file_mat(t_dlist *tokens, int result, enum e_type type,
@@ -58,6 +70,7 @@ char	**files_in(t_dlist *tokens)
 	int		result;
 	t_dlist	*aux;
 	char	**files;
+	char	*str_error;
 
 	aux = tokens;
 	result = 0;
@@ -66,7 +79,28 @@ char	**files_in(t_dlist *tokens)
 	while (aux->tok->type != PIPE)
 	{
 		if (aux->tok->type == R_IN || aux->tok->type == H_DOC)
+		{
+			if (aux->next)
+			{
+				if (*aux->next->tok->lex = '\0')
+				{
+					str_error = formatted_string("(", (char *) aux->next->tok->metadata[3], "): ", "ambiguous redirect\n");
+					ft_putstr_fd(str_error, STDERR_FILENO);
+					return (NULL);
+				}
+				if (aux->next->next)
+				{
+					if (aux->next->next->tok->type == IO_FILE)
+					{
+						str_error = formatted_string("(", (char *) aux->next->tok->metadata[3], "): ", "ambiguous redirect\n");
+						ft_putstr_fd(str_error, STDERR_FILENO);
+						return (NULL);
+					}
+
+				}
+			}
 			result++;
+		}
 		if (aux->prev == NULL)
 			break ;
 		aux = aux->prev;

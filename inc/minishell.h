@@ -50,9 +50,9 @@
 
 enum e_error
 {
-	NOFILE,
-	MINI_EACCES = 13,
-	MINI_EISDIR = 21
+	NOFILE = 3,
+	MINI_EACCES = 167,
+	MINI_EISDIR = 168
 };
 
 enum e_type
@@ -73,7 +73,7 @@ typedef struct s_token {
 	enum e_type		type;
 	char			*lex;
 	char			*heredoc_file;
-	int				metadata[4];
+	long int		metadata[4];
 }	t_token;
 
 typedef struct s_dlist {
@@ -240,11 +240,11 @@ t_dlist	*free_chunk_list(t_dlist *tokens);
 // Builtins
 int		builtins_checker(t_ast *root);
 int		cd(char **matrix);
-int		export(char **matrix);
+int		builtin_export(char **matrix);
 int		echo(char **matrix);
 int		pwd(void);
 int		env(char **args);
-int		builtin_exit(char **matrix);
+int		builtin_exit(t_ast *root, int *stdout_fd);
 int		report_error_export(void);
 int		show_variables(char **envp);
 int		unset(char **args);
@@ -262,17 +262,17 @@ char	**create_cmd_matrix(t_dlist *tokens);
 char	**tokens_to_args(t_ast *leaf);
 char	**get_paths(void);
 char	*its_a_address(char *lex);
-void	files_out_control(t_ast *root);
-void	files_in_control(t_ast *root);
 void	handle_pipe(t_ast *leaf);
 void	execution(t_ast **ast);
 void	execve_error_exit(t_ast *root);
-void	redir_fds_control(t_ast *raiz);
 void	manage_pipes_fd(int *pipe_fds, int side);
+int		redir_fds_control(t_ast *root);
+int		files_out_control(t_ast *root);
+int		files_in_control(t_ast *root);
 t_ast	*create_cmd_leaf(t_dlist *tokens);
 
 // Exec errors
-void	redirect_in_error(t_ast *root);
-void	redirect_out_error(t_ast *root);
+int		redirect_in_error(t_ast *root);
+int		redirect_out_error(t_ast *root);
 
 #endif

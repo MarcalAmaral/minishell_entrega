@@ -6,7 +6,7 @@
 /*   By: myokogaw <myokogaw@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 18:00:50 by parthur-          #+#    #+#             */
-/*   Updated: 2024/06/16 05:36:40 by myokogaw         ###   ########.fr       */
+/*   Updated: 2024/06/17 20:45:28 by myokogaw         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,8 @@ void	exec_cmd(t_ast *root)
 {
 	int		exit_status;
 
-	redir_fds_control(root);
+	if (redir_fds_control(root))
+		return ;
 	if (*root->cmd_matrix && (builtins_checker(root) < 0))
 	{
 		exit_status = command_not_found(root->path, root->cmd_matrix);
@@ -112,6 +113,8 @@ void	tree_exec(t_ast *root)
 	int	pipe_fds[2];
 	int	forks[2];
 
+	forks[0] = 0;
+	forks[1] = 0;
 	if (pipe(pipe_fds) == -1)
 		return ;
 	if (root->left->type == PIPE)
