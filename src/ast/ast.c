@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ast.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: myokogaw <myokogaw@student.42sp.org.br>    +#+  +:+       +#+        */
+/*   By: parthur- <parthur-@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 18:00:50 by parthur-          #+#    #+#             */
-/*   Updated: 2024/06/17 20:45:28 by myokogaw         ###   ########.fr       */
+/*   Updated: 2024/06/18 20:39:07 by parthur-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ void	execv_pipes(t_ast *root)
 		}
 		signal(SIGQUIT, SIG_DFL);
 		if (execve(root->path, root->cmd_matrix, hook_environ(NULL, 0)) == -1)
-			execve_error_exit(root);
+			execve_error_exit(root->first_leaf);
 	}
 	last_exit_status(get_ret_process(pid));
 }
@@ -73,7 +73,7 @@ void	exec_cmd(t_ast *root)
 		return ;
 	if (*root->cmd_matrix && (builtins_checker(root) < 0))
 	{
-		exit_status = command_not_found(root->path, root->cmd_matrix);
+		exit_status = path_validation(root->path, root->cmd_matrix);
 		if (!exit_status && root->path && **root->cmd_matrix)
 			execv_pipes(root);
 	}

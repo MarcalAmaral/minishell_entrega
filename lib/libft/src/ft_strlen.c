@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strlen.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: myokogaw <myokogaw@student.42.fr>          +#+  +:+       +#+        */
+/*   By: myokogaw <myokogaw@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/01 19:18:13 by myokogaw          #+#    #+#             */
-/*   Updated: 2023/10/01 00:57:57 by myokogaw         ###   ########.fr       */
+/*   Updated: 2024/06/21 17:35:08 by myokogaw         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,10 @@ size_t	ft_strlen(const char *s)
 {
 	size_t	counter;
 
-	counter = -1;
-	while (counter++, *s)
-		s++;
+	if (!s)
+		return (0);
+	counter = 0;
+	while (s[counter])
+		counter++;
 	return (counter);
 }

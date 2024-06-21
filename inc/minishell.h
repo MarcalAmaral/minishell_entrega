@@ -48,11 +48,16 @@
 # define NOTSETHOME 2
 # define ERRNO 1
 
+# define MAX64BITS "+9223372036854775807"
+# define MIN64BITS "-9223372036854775808"
+
 enum e_error
 {
-	NOFILE = 3,
-	MINI_EACCES = 167,
-	MINI_EISDIR = 168
+	NOFILE,
+	MINI_EACCES,
+	MINI_EISDIR,
+	NUMARGREQUIRED,
+	TOOMANYARG
 };
 
 enum e_type
@@ -130,6 +135,7 @@ void	ft_close_fds(void);
 void	close_fds(int fd_max);
 void	skip_single_quotes(char *lexeme, long int *position);
 void	handling_pipe(t_dlist **head, char **lexemes, int *index);
+void	write_err_msg(char	*file, enum e_error error);
 int		ft_open_fd(char *path, int flags);
 int		ft_have_char(char *str, char c);
 int		ft_have_op(char *input);
@@ -148,9 +154,16 @@ int		after_prompt(int is_after);
 int		heredoc_file_counter(int filenum);
 int		received_sigint_in_heredoc(int status);
 int		is_process(int consult_or_change);
+int		biggest_character(char character, char comparator);
 size_t	matrix_len(char **mat);
 t_dlist	*go_to_pipe_or_first(t_dlist *aux_t);
 t_dlist	*go_to_first_word(t_dlist *tokens);
+long long int	ft_atolli(const char *nptr);
+int	finishing_program_exit(t_ast *root, int *std_fds,
+		long long int exit_status);
+int	write_err_msg_exit(enum e_error error, const char *arg);
+void	verifying_math_symbol(const char *arg,
+		int *is_negative, int *has_math_symbol)
 
 // dlist procedures
 int		ft_dlist_have_type(t_dlist **tokens, enum e_type type);
@@ -216,21 +229,21 @@ int		check_pipes(t_dlist **tokens);
 
 // Handle error
 int		syntax_error(int type, t_dlist **tokens);
-int		command_not_found(char *path, char **matrix);
+int		path_validation(char *path, char **matrix);
 
 // Parser
 void	parser(t_dlist **tokens);
 int		parser_validation(t_dlist **tokens);
 
 // AST procedures
-void	exec_cmd(t_ast *raiz);
+void	exec_cmd(t_ast *root);
 void	ast_function(t_dlist **tokens);
 void	tree_exec(t_ast *root);
 void	command_organizer(t_ast *root, int pipe_fds[2], int side);
 void	standard_command_organizer(t_ast *root, int pipe_fds[2]);
 void	first_command_organizer(t_ast *root, int pipe_fds[2]);
 // void	closing_father(t_ast *root);
-void	closing_only_child(t_ast *raiz, t_dlist **tokens);
+void	closing_only_child(t_ast *root);
 void	only_child_functions(t_dlist **tokens);
 void	brothers_functions(t_dlist **tokens);
 t_ast	*create_ast(t_dlist **tokens);
@@ -273,7 +286,7 @@ int		files_in_control(t_ast *root);
 t_ast	*create_cmd_leaf(t_dlist *tokens);
 
 // Exec errors
-int		redirect_in_error(t_ast *root);
-int		redirect_out_error(t_ast *root);
+int		redirect_in_error(char **matrix_err, char *file, int index);
+int		redirect_out_error(char **matrix_err, char *file, int index);
 
 #endif

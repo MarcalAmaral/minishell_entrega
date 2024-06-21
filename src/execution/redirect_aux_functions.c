@@ -12,45 +12,45 @@
 
 #include "minishell.h"
 
-int	check_append(char **mat_append, char *ref)
+int	check_append(char **matrix_append, char *reference)
 {
-	int	i;
+	int	index;
 
-	i = 0;
-	while (mat_append[i])
+	index = 0;
+	while (matrix_append[index])
 	{
-		if (ft_strcmp(mat_append[i], ref) == 0)
+		if (ft_strcmp(matrix_append[index], reference) == 0)
 		{
-			free(ref);
-			return (1);
+			free(reference);
+			return (TRUE);
 		}	
-		i++;
+		index++;
 	}
-	free(ref);
-	return (0);
+	free(reference);
+	return (FALSE);
 }
 
-char	**creat_append_mat(t_dlist *aux_t, int size_append)
+char	**creat_append_mat(t_dlist *tok, int matrix_size)
 {
-	int		i;
-	char	**appends;
-	int		i_append;
+	int		redir_count;
+	char	**matrix_append;
+	int		index_matrix_append;
 
-	i_append = 0;
-	i = 0;
-	appends = ft_calloc(sizeof(char *), (size_append + 1));
-	while (aux_t->next != NULL)
+	index_matrix_append = 0;
+	redir_count = 0;
+	matrix_append = ft_calloc(sizeof(char *), (matrix_size + 1));
+	while (tok->next != NULL)
 	{
-		if (aux_t->tok->type == R_OUT || aux_t->tok->type == APPEND)
-			i++;
-		if (aux_t->tok->type == APPEND)
+		if (tok->tok->type == R_OUT || tok->tok->type == APPEND)
+			redir_count++;
+		if (tok->tok->type == APPEND)
 		{
-			appends[i_append] = ft_itoa(i - 1);
-			i_append++;
+			matrix_append[index_matrix_append] = ft_itoa(redir_count - 1);
+			index_matrix_append++;
 		}
-		aux_t = aux_t->next;
+		tok = tok->next;
 	}
-	return (appends);
+	return (matrix_append);
 }
 
 char	**have_append(t_dlist *tokens)
@@ -82,23 +82,21 @@ int	files_out_control(t_ast *root)
 	i = 0;
 	while (root && root->files[1][i] != NULL)
 	{
+		if (root->redir_fds[1] != 0)
+			close(root->redir_fds[1]);
 		if (root->files[2] != NULL)
 		{
 			if (check_append(root->files[2], ft_itoa(i)) > 0)
-			{
 				root->redir_fds[1] = open(root->files[1][i],
 						O_WRONLY | O_CREAT | O_APPEND, 0000666);
-			}
 			else
 				root->redir_fds[1] = open(root->files[1][i],
 						O_WRONLY | O_CREAT | O_TRUNC, 0000666);
 		}
 		else
-		{
 			root->redir_fds[1] = open(root->files[1][i],
 					O_WRONLY | O_CREAT | O_TRUNC, 0000666);
-		}
-		if (redirect_out_error(root))
+		if (redirect_out_error(root->files[3], root->files[1][i], i))
 			return (EXIT_FAILURE);
 		i++;
 	}
@@ -110,10 +108,12 @@ int	files_in_control(t_ast *root)
 	int	i;
 
 	i = 0;
-	if (redirect_in_error(root))
-		return (EXIT_FAILURE);
 	while (root->files[0][i] != NULL)
 	{
+		if (redirect_in_error(root->files[3], root->files[0][i], i))
+			return (EXIT_FAILURE);
+		if (root->redir_fds[0] != 0)
+			close(root->redir_fds[0]);
 		root->redir_fds[0] = open(root->files[0][i], O_RDONLY);
 		i++;
 	}

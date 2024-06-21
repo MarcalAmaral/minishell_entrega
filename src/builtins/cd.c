@@ -6,7 +6,7 @@
 /*   By: myokogaw <myokogaw@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/26 15:58:57 by myokogaw          #+#    #+#             */
-/*   Updated: 2024/06/17 17:44:33 by myokogaw         ###   ########.fr       */
+/*   Updated: 2024/06/20 16:35:48 by myokogaw         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,10 @@ int	try_except_change_dir(char *curpath)
 	else if (curpath)
 	{
 		if (chdir(curpath))
+		{
+			free(curpath);
 			return (error_msg_cd(ERRNO, home));
+		}
 	}
 	update_environment();
 	free(home);
